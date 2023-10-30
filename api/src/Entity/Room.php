@@ -20,7 +20,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use function Symfony\Component\String\u;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use ApiPlatform\Metadata\Link;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
 #[ApiResource(
@@ -29,6 +29,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     denormalizationContext: [
         'groups' => ['room:write'],
+    ],
+    uriTemplate: '/room/{room_id}/users.{_format}',
+    uriVariables: [
+        'room_id' => new Link(
+            fromProperty: 'users',
+            fromClass: Room::class,
+        ),
     ],
     formats: [
         'jsonld',
@@ -57,46 +64,48 @@ class Room
     private ?int $id = null;
 
     #[Assert\NotBlank]
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $roomNumber = null;
 
     #[Assert\NotBlank]
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $roomHotelName = null;
 
     #[Assert\NotBlank]
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[Assert\GreaterThanOrEqual(0)]
     #[Assert\LessThanOrEqual(4)]
     #[Assert\NotBlank]
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column]
     private ?int $freeBed = null;
 
     #[Assert\GreaterThanOrEqual(0)]
     #[Assert\LessThanOrEqual(4)]
     #[Assert\NotBlank]
-    #[Groups(['room:read', 'room:write'])]
+    #[Groups(['room:read', 'room:write','user:read'])]
     #[ORM\Column]
     #[ApiFilter(RangeFilter::class)]
     private ?int $totalbeds = null;
 
     #[ORM\OneToMany(mappedBy: 'room', targetEntity: User::class)]
+    #[Groups(['room:read'])]
+
     private Collection $users;
 
     public function __construct(string $roomHotelName)

@@ -2,6 +2,12 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -10,6 +16,8 @@ use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\Link;
+
 
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 #[UniqueEntity(fields: ['username'], message: 'It looks like another user took this username...')]
@@ -18,6 +26,22 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
+    uriTemplate: '/rooms/{room_id}/users.{_format}',
+    shortName:'ClientsIn',
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Put(),
+        new Patch(),
+        new Delete()
+    ],
+    uriVariables: [
+        'room_id' => new Link(
+            fromProperty: 'users',
+            fromClass: Room::class,
+        ),
+    ],
 )]
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -28,7 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'room:read'])]
     #[Assert\NotBlank]
     #[Assert\Email]
     private ?string $email = null;
@@ -44,12 +68,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write', 'room:read'])]
     #[Assert\NotBlank]
     private ?string $username = null;
 
     #[Groups(['user:read', 'user:write'])]
     #[ORM\ManyToOne(inversedBy: 'users')]
+    
     private ?Room $room = null;
 
     public function getId(): ?int

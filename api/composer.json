@@ -29,6 +29,7 @@
         "symfony/serializer": "6.3.*",
         "symfony/twig-bundle": "6.3.*",
         "symfony/validator": "6.3.*",
+        "symfony/webpack-encore-bundle": "*",
         "symfony/yaml": "6.3.*",
         "webonyx/graphql-php": "^15.7"
     },
